@@ -1,0 +1,55 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Вход в аккаунт</h1>
+            <p>Введите свои данные для входа</p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="email">Почта</label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ form.email.value|default_if_none:'' }}" required>
+                {% for error in form.email.errors %}
+                    <small class="alert alert-error" style="display:block;margin-top:0.5rem;">{{ error }}</small>
+                {% endfor %}
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+                {% for error in form.password.errors %}
+                    <small class="alert alert-error" style="display:block;margin-top:0.5rem;">{{ error }}</small>
+                {% endfor %}
+            </div>
+            
+            <button type="submit" class="btn">Войти</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Нет аккаунта? <a href="{% url 'signup' %}">Зарегистрируйтесь</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

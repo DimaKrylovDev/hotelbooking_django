@@ -1,0 +1,160 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .reply-wrapper {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+    }
+
+    .reply-wrapper h1 {
+        margin: 0 0 1.5rem;
+        color: var(--primary-color);
+        font-size: 1.6rem;
+    }
+
+    .review-preview {
+        padding: 1.25rem;
+        background: var(--light-color);
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .review-preview .author {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .review-preview .rating {
+        color: #f59e0b;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .review-preview .text {
+        color: var(--dark-color);
+        line-height: 1.6;
+        font-style: italic;
+    }
+
+    .review-preview .meta {
+        color: #6b7a90;
+        font-size: 0.85rem;
+        margin-top: 0.75rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--primary-color);
+        color: #fff;
+    }
+
+    .existing-reply {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(40, 167, 69, 0.08);
+        border-radius: var(--border-radius);
+        border-left: 4px solid #28a745;
+    }
+
+    .existing-reply h4 {
+        margin: 0 0 0.5rem;
+        color: #28a745;
+        font-size: 0.9rem;
+    }
+
+    .existing-reply p {
+        margin: 0;
+        color: var(--dark-color);
+    }
+</style>
+
+<div class="reply-wrapper">
+    <h1>💬 Ответ на отзыв</h1>
+
+    <div class="review-preview">
+        <div class="author">{{ review.guest.get_full_name|default:review.guest.email }}</div>
+        <div class="rating">⭐ {{ review.rating }}/5</div>
+        {% if review.review_text %}
+            <div class="text">"{{ review.review_text }}"</div>
+        {% else %}
+            <div class="text" style="color:#6b7a90;">Без текста отзыва</div>
+        {% endif %}
+        <div class="meta">
+            Комната: {{ review.room.get_room_type_display }} • {{ review.room.address }}<br>
+            {{ review.created_at|date:"d.m.Y H:i" }}
+        </div>
+    </div>
+
+    {% if review.owner_reply and not request.POST %}
+    <div class="existing-reply">
+        <h4>✅ Ваш текущий ответ ({{ review.owner_reply_at|date:"d.m.Y H:i" }})</h4>
+        <p>{{ review.owner_reply }}</p>
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_owner_reply">{{ form.owner_reply.label }}</label>
+            {{ form.owner_reply }}
+            {% if form.owner_reply.errors %}
+                <div style="color: var(--error-color); font-size: 0.85rem; margin-top: 0.25rem;">
+                    {{ form.owner_reply.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn">
+                {% if review.owner_reply %}Обновить ответ{% else %}Отправить ответ{% endif %}
+            </button>
+            <a href="{% url 'reviews' %}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

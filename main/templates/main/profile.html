@@ -1,0 +1,353 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .profile-wrapper {
+        display: grid;
+        gap: 2rem;
+        padding: 1rem 0 3rem;
+        background: #f5f5f5;
+        min-height: 100vh;
+    }
+
+    .profile-card, .summary-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        display: grid;
+        place-items: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .profile-header-content h1 {
+        margin: 0 0 0.5rem;
+        color: var(--primary-color);
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    .profile-header-content p {
+        margin: 0;
+        color: #6b7a90;
+        font-size: 0.95rem;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        color: #6b7a90;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: var(--dark-color);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .booking-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .empty-state {
+        padding: 3rem 2rem;
+        border: 2px dashed rgba(0, 0, 0, 0.15);
+        border-radius: var(--border-radius);
+        text-align: center;
+        color: #6b7a90;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 1rem;
+        color: var(--dark-color);
+        font-size: 1.1rem;
+    }
+
+    .empty-state p {
+        margin: 0 0 2rem;
+        color: #6b7a90;
+        font-size: 0.95rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .btn-logout {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .btn-logout:hover {
+        background: #c82333;
+    }
+
+    .summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .summary-header h2 {
+        margin: 0 0 0.5rem;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .summary-header p {
+        margin: 0;
+        color: #6b7a90;
+        font-size: 0.9rem;
+    }
+
+    .history-btn {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: var(--border-radius);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background-color 0.2s;
+    }
+
+    .history-btn:hover {
+        background: #0056d6;
+    }
+
+    @media (max-width: 768px) {
+        .profile-wrapper {
+            padding: 0.5rem 0 2rem;
+        }
+
+        .profile-card, .summary-card {
+            padding: 1.5rem;
+        }
+
+        .profile-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-header {
+            flex-direction: column;
+        }
+
+        .history-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<section class="profile-wrapper">
+    <article class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% with first_source=request.user.first_name|default:request.user.email %}
+                    {% with last_source=request.user.last_name|default:request.user.email %}
+                        {{ first_source|slice:":1"|lower }}{{ last_source|slice:":1"|lower }}
+                    {% endwith %}
+                {% endwith %}
+            </div>
+            <div class="profile-header-content">
+                <h1>Здравствуйте, {{ request.user.get_full_name|default:request.user.email }}!</h1>
+                <p>Управляйте своими бронированиями и персональными данными.</p>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ request.user.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Телефон</span>
+                <span class="info-value">{{ request.user.phone|default:"не указан" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Статус аккаунта</span>
+                <span class="status-badge">
+                    {% if request.user.is_active %}
+                        АКТИВЕН
+                    {% else %}
+                        ЗАБЛОКИРОВАН
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Тип пользователя</span>
+                <span class="info-value">
+                    {{ request.user.get_role_display }}
+                </span>
+            </div>
+        </div>
+
+        <div class="action-buttons" style="margin-top: 1.5rem;">
+            <a href="{% url 'edit_profile' %}" class="btn btn-secondary">✏️ Редактировать профиль</a>
+            <a href="{% url 'reviews' %}" class="btn btn-secondary">⭐ Мои отзывы</a>
+            {% if request.user.is_owner %}
+                <a href="{% url 'my_rooms_bookings' %}" class="btn" style="background: #17a2b8;">📋 Бронирования моих комнат</a>
+            {% endif %}
+            {% if request.user.is_admin %}
+                <a href="/admin/" class="btn" style="background: #9c27b0;">🛡️ Админ-панель</a>
+            {% endif %}
+            {% if request.user.is_staff %}
+                <a href="{% url 'review_moderation_list' %}" class="btn" style="background: #ff9800;">💬 Модерация отзывов</a>
+            {% endif %}
+        </div>
+    </article>
+
+    <article class="summary-card">
+        <div class="summary-header">
+            <div>
+                <h2>Текущие бронирования</h2>
+                <p>Следите за деталями ваших ближайших поездок.</p>
+            </div>
+            <a href="{% url 'booking_history' %}" class="history-btn">
+                📜 История бронирований
+            </a>
+        </div>
+
+        {% if booking %}
+            <div style="padding: 1.5rem; background: var(--light-color); border-radius: var(--border-radius); margin-bottom: 1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <strong style="color: var(--primary-color); font-size: 1.1rem;">{{ booking.room.get_room_type_display }} • {{ booking.room.price_per_night }} ₽ / ночь</strong>
+                    <span class="status-badge">{{ booking.get_status_display }}</span>
+                </div>
+                <div style="display:grid;gap:0.75rem;">
+                    <div><strong>Тип номера:</strong> {{ booking.room.get_room_type_display }}</div>
+                    <div><strong>Адрес:</strong> {{ booking.room.address }}</div>
+                    <div><strong>Даты:</strong> {{ booking.check_in_date|date:"d.m.Y" }} — {{ booking.check_out_date|date:"d.m.Y" }}</div>
+                    <div><strong>Итого:</strong> {{ booking.total_cost|floatformat:2 }} ₽</div>
+                </div>
+            </div>
+            <div class="booking-actions">
+                {% if booking.status == 'Pending' %}
+                    <a href="{% url 'booking_confirm' booking.pk %}" class="btn" style="background: var(--success-color); color: white;">✅ Подтвердить</a>
+                {% endif %}
+                <a href="{% url 'booking_update' booking.pk %}" class="btn btn-secondary">✏️ Изменить бронь</a>
+                <a href="{% url 'booking_delete' booking.pk %}" class="btn btn-logout">🗑️ Удалить</a>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>Пока нет активных бронирований</h3>
+                <p>Начните планировать поездку, чтобы увидеть здесь подробности брони и управлять поездкой.</p>
+            </div>
+            <div class="action-buttons">
+                <a href="{% url 'home' %}" class="btn">Найти отель</a>
+                <a href="{% url 'edit_profile' %}" class="btn">Редактировать профиль</a>
+            </div>
+        {% endif %}
+    </article>
+
+    <!-- Бронирования комнат владельца -->
+    {% if request.user.is_owner and owner_bookings %}
+    <article class="summary-card">
+        <div class="summary-header">
+            <div>
+                <h2>Бронирования моих комнат</h2>
+                <p>Управляйте бронированиями ваших комнат</p>
+            </div>
+        </div>
+
+        <div style="display:grid;gap:1.5rem;">
+            {% for owner_booking in owner_bookings %}
+                <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:0.75rem;">
+                    <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+                        <strong>{{ owner_booking.room.get_room_type_display }} • {{ owner_booking.room.price_per_night }} ₽ / ночь</strong>
+                        <span class="status-chip">{{ owner_booking.get_status_display }}</span>
+                    </div>
+                    <div style="width:100%;display:grid;gap:0.5rem;">
+                        <span><strong>Гость:</strong> {{ owner_booking.guest.get_full_name }}</span>
+                        <span><strong>Адрес:</strong> {{ owner_booking.room.address }}</span>
+                        <span><strong>Даты:</strong> {{ owner_booking.check_in_date|date:"d.m.Y" }} — {{ owner_booking.check_out_date|date:"d.m.Y" }}</span>
+                        <span><strong>Итого:</strong> {{ owner_booking.total_cost|floatformat:2 }} ₽</span>
+                    </div>
+                    {% if owner_booking.status == 'Pending' %}
+                    <div class="booking-actions" style="margin-top:0.5rem;">
+                        <a href="{% url 'booking_confirm' owner_booking.pk %}" class="btn" style="background: var(--success-color); color: white;">✅ Подтвердить</a>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </article>
+    {% endif %}
+
+    {% include 'main/user_rooms.html' %}
+</section>
+{% endblock %}
+

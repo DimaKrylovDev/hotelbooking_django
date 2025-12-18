@@ -1,0 +1,335 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .edit-profile-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2.5rem;
+        border: 3px solid white;    
+    }
+    
+    .profile-body {
+        padding: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    
+    .btn-save {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .btn-save:hover {
+        background: #218838;
+    }
+    
+    .form-help {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .error-list {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        padding-left: 1rem;
+    }
+    
+    .error-list li {
+        margin-bottom: 0.25rem;
+    }
+    
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="edit-profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            {{ user.first_name|first }}{{ user.last_name|first }}
+        </div>
+        <h1>Редактирование профиля</h1>
+        <p>Обновите вашу личную информацию</p>
+    </div>
+    
+    <div class="profile-body">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Форма редактирования профиля -->
+        <div class="form-section">
+            <h2 class="section-title">👤 Основная информация</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}">Имя *</label>
+                        <input type="text" 
+                               name="first_name" 
+                               id="{{ form.first_name.id_for_label }}"
+                               value="{{ form.first_name.value|default:user.first_name }}"
+                               class="form-control {% if form.first_name.errors %}is-invalid{% endif %}"
+                               required>
+                        {% if form.first_name.errors %}
+                            <ul class="error-list">
+                                {% for error in form.first_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}">Фамилия *</label>
+                        <input type="text" 
+                               name="last_name" 
+                               id="{{ form.last_name.id_for_label }}"
+                               value="{{ form.last_name.value|default:user.last_name }}"
+                               class="form-control {% if form.last_name.errors %}is-invalid{% endif %}"
+                               required>
+                        {% if form.last_name.errors %}
+                            <ul class="error-list">
+                                {% for error in form.last_name.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email *</label>
+                        <input type="email" 
+                               name="email" 
+                               id="{{ form.email.id_for_label }}"
+                               value="{{ form.email.value|default:user.email }}"
+                               class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                               required>
+                        {% if form.email.errors %}
+                            <ul class="error-list">
+                                {% for error in form.email.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.phone.id_for_label }}">Телефон *</label>
+                        <input type="text" 
+                               name="phone" 
+                               id="{{ form.phone.id_for_label }}"
+                               value="{{ form.phone.value|default:user.phone }}"
+                               class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+                               required>
+                        {% if form.phone.errors %}
+                            <ul class="error-list">
+                                {% for error in form.phone.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" name="update_profile" class="btn btn-save">
+                        💾 Сохранить изменения
+                    </button>
+                    <a href="{% url 'profile' %}" class="btn btn-cancel">
+                        ❌ Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Форма смены пароля -->
+        <div class="form-section">
+            <h2 class="section-title">🔒 Смена пароля</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ password_form.current_password.id_for_label }}">Текущий пароль</label>
+                        <input type="password" 
+                               name="current_password" 
+                               id="{{ password_form.current_password.id_for_label }}"
+                               class="form-control {% if password_form.current_password.errors %}is-invalid{% endif %}"
+                               placeholder="Введите текущий пароль">
+                        {% if password_form.current_password.errors %}
+                            <ul class="error-list">
+                                {% for error in password_form.current_password.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ password_form.new_password.id_for_label }}">Новый пароль</label>
+                        <input type="password" 
+                               name="new_password" 
+                               id="{{ password_form.new_password.id_for_label }}"
+                               class="form-control {% if password_form.new_password.errors %}is-invalid{% endif %}"
+                               placeholder="Введите новый пароль">
+                        <div class="form-help">Пароль должен содержать минимум 8 символов</div>
+                        {% if password_form.new_password.errors %}
+                            <ul class="error-list">
+                                {% for error in password_form.new_password.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ password_form.confirm_password.id_for_label }}">Подтверждение пароля</label>
+                        <input type="password" 
+                               name="confirm_password" 
+                               id="{{ password_form.confirm_password.id_for_label }}"
+                               class="form-control {% if password_form.confirm_password.errors %}is-invalid{% endif %}"
+                               placeholder="Повторите новый пароль">
+                        {% if password_form.confirm_password.errors %}
+                            <ul class="error-list">
+                                {% for error in password_form.confirm_password.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if password_form.non_field_errors %}
+                    <div class="alert alert-error">
+                        {% for error in password_form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-actions">
+                    <button type="submit" name="change_password" class="btn btn-save">
+                        🔑 Сменить пароль
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

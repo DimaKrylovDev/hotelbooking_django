@@ -1,0 +1,285 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .moderation-wrapper {
+        padding: 1rem 0 3rem;
+    }
+
+    .moderation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .moderation-header h1 {
+        margin: 0;
+        color: var(--primary-color);
+        font-size: 1.8rem;
+    }
+
+    .moderation-header p {
+        margin: 0.25rem 0 0;
+        color: #6b7a90;
+    }
+
+    .pending-badge {
+        background: rgba(255, 193, 7, 0.15);
+        color: #856404;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: white;
+        color: var(--dark-color);
+    }
+
+    .filter-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .filter-btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .reviews-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .review-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .review-author {
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .review-meta {
+        color: #6b7a90;
+        font-size: 0.9rem;
+    }
+
+    .rating {
+        color: #f59e0b;
+        font-weight: 700;
+    }
+
+    .review-text {
+        color: var(--dark-color);
+        line-height: 1.5;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.15);
+        color: #856404;
+    }
+
+    .status-approved {
+        background: rgba(40, 167, 69, 0.15);
+        color: #155724;
+    }
+
+    .status-rejected {
+        background: rgba(220, 53, 69, 0.15);
+        color: #721c24;
+    }
+
+    .review-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-approve {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-approve:hover {
+        background: #218838;
+        color: white;
+    }
+
+    .btn-reject {
+        background: transparent;
+        color: var(--error-color);
+        border: 1px solid var(--error-color);
+    }
+
+    .btn-reject:hover {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .btn-edit {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: var(--dark-color);
+        color: white;
+    }
+
+    .empty-state {
+        padding: 3rem 2rem;
+        text-align: center;
+        background: white;
+        border-radius: var(--border-radius);
+        border: 2px dashed rgba(0, 0, 0, 0.12);
+        color: #6b7a90;
+    }
+
+    .moderation-info {
+        font-size: 0.85rem;
+        color: #6b7a90;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: var(--border-radius);
+    }
+</style>
+
+<section class="moderation-wrapper">
+    <div class="moderation-header">
+        <div>
+            <h1>🛡️ Модерация отзывов</h1>
+            <p>
+                Управление отзывами пользователей
+                {% if pending_count > 0 %}
+                    <span class="pending-badge">{{ pending_count }} на модерации</span>
+                {% endif %}
+            </p>
+        </div>
+        <div style="display:flex; gap:0.75rem; flex-wrap: wrap;">
+            <a href="{% url 'profile' %}" class="btn btn-secondary" style="width:auto;">← Назад в профиль</a>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <a href="{% url 'review_moderation_list' %}" class="filter-btn {% if not current_status %}active{% endif %}">
+            Все
+        </a>
+        {% for value, label in review_statuses %}
+            <a href="?status={{ value }}" class="filter-btn {% if current_status == value %}active{% endif %}">
+                {{ label }}
+            </a>
+        {% endfor %}
+    </div>
+
+    {% if reviews %}
+        <div class="reviews-list">
+            {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-top">
+                        <div>
+                            <div class="review-author">{{ review.guest.get_full_name|default:review.guest.email }}</div>
+                            <div class="review-meta">
+                                Комната: {{ review.room.get_room_type_display }} • {{ review.room.address }}<br>
+                                {{ review.created_at|date:"d.m.Y H:i" }}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="rating">⭐ {{ review.rating }}/5</div>
+                            <span class="status-badge status-{{ review.status }}">
+                                {{ review.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {% if review.review_text %}
+                        <div class="review-text">{{ review.review_text }}</div>
+                    {% else %}
+                        <div class="review-text" style="color:#6b7a90;">Без текста отзыва</div>
+                    {% endif %}
+
+                    {% if review.moderated_by %}
+                        <div class="moderation-info">
+                            Модератор: {{ review.moderated_by.get_full_name|default:review.moderated_by.email }}
+                            • {{ review.moderated_at|date:"d.m.Y H:i" }}
+                            {% if review.moderation_comment %}
+                                <br>Комментарий: {{ review.moderation_comment }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="review-actions">
+                        {% if review.status == 'pending' %}
+                            <a href="{% url 'review_quick_moderate' review.pk 'approve' %}" class="btn-sm btn-approve">✓ Одобрить</a>
+                            <a href="{% url 'review_quick_moderate' review.pk 'reject' %}" class="btn-sm btn-reject">✕ Отклонить</a>
+                        {% endif %}
+                        <a href="{% url 'review_moderate' review.pk %}" class="btn-sm btn-edit">✏️ Подробнее</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            {% if current_status %}
+                Нет отзывов со статусом "{{ current_status }}".
+            {% else %}
+                Пока нет отзывов для модерации.
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+

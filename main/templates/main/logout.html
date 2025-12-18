@@ -1,0 +1,184 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .logout-container {
+        max-width: 500px;
+        margin: 4rem auto;
+        padding: 3rem 2rem;
+        text-align: center;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+    }
+    
+    .logout-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+    }
+    
+    .logout-message {
+        margin-bottom: 2rem;
+    }
+    
+    .logout-message h1 {
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        font-size: 2rem;
+    }
+    
+    .logout-message p {
+        color: #6c757d;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    .user-info {
+        background: var(--light-color);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin: 2rem 0;
+        text-align: left;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+    
+    .info-value {
+        color: var(--primary-color);
+    }
+    
+    .logout-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    
+    .btn-cancel {
+        background: var(--light-color);
+        color: var(--dark-color);
+        border: 1px solid var(--border-color);
+    }
+    
+    .btn-cancel:hover {
+        background: #e9ecef;
+        color: var(--dark-color);
+    }
+    
+    .btn-logout {
+        background: var(--error-color);
+        color: white;
+    }
+    
+    .btn-logout:hover {
+        background: #c82333;
+        color: white;
+    }
+    
+    .benefits-list {
+        text-align: left;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .benefits-list h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .benefits-list ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .benefits-list li {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .benefits-list li::before {
+        content: "✓";
+        color: var(--success-color);
+        font-weight: bold;
+    }
+</style>
+
+<div class="logout-container">
+    <div class="logout-icon">🚪</div>
+    
+    <div class="logout-message">
+        <h1>Выход из системы</h1>
+        <p>Вы уверены, что хотите выйти из своего аккаунта?</p>
+    </div>
+    
+    {% if request.user.is_authenticated %}
+    <div class="user-info">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-color); text-align: center;">Текущий пользователь:</h3>
+        <div class="info-item">
+            <span class="info-label">Имя:</span>
+            <span class="info-value">{{ user.first_name }} {{ user.last_name }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{ user.email }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Тип аккаунта:</span>
+            <span class="info-value">
+                {% if user.is_owner %}
+                    🏨 Владелец отеля
+                {% else %}
+                    🧳 Путешественник
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="benefits-list">
+        <h3>После выхода вы:</h3>
+        <ul>
+            <li>Потеряете доступ к личному кабинету</li>
+            <li>Не сможете управлять бронированиями</li>
+            <li>Избранные отели будут временно недоступны</li>
+            <li>Сможете войти снова в любое время</li>
+        </ul>
+    </div>
+    
+    <div class="logout-actions">
+        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-logout">Да, выйти</button>
+        </form>
+        <a href="{% url 'profile' %}" class="btn btn-cancel">Отмена</a>
+        <a href="{% url 'home' %}" class="btn btn-primary">На главную</a>
+    </div>
+    
+    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <p style="color: #6c757d; font-size: 0.9rem;">
+            Хотите остаться в системе?<br>
+            <a href="{% url 'profile' %}" style="color: var(--primary-color);">Вернуться в профиль</a> 
+            или 
+            <a href="{% url 'home' %}" style="color: var(--primary-color);">продолжить поиск отелей</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

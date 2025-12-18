@@ -1,0 +1,58 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+
+<form method="post" class="search-form">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="town">Город</label>
+        <input type="text" name="town" id="town" class="form-control" required 
+               value="{{ request.POST.town }}" placeholder="Введите город">
+    </div>
+    
+    <div class="form-group">
+        <label for="check_in">Дата заезда</label>
+        <input type="date" name="check_in" id="check_in" class="form-control" required 
+               value="{{ request.POST.check_in }}" min="{{ today }}">
+    </div>
+    
+    <div class="form-group">
+        <label for="check_out">Дата выезда</label>
+        <input type="date" name="check_out" id="check_out" class="form-control" required 
+               value="{{ request.POST.check_out }}" min="{{ tomorrow }}">
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Найти комнаты</button>
+</form>
+
+{% if search_performed %}
+<div class="search-results">
+    <h3>Найдено комнат: {{ available_rooms|length }}</h3>
+    
+    {% for room in available_rooms %}
+    <div class="room-card">
+        <h4>{{ room.get_room_type_display }}</h4>
+        <p>Цена за ночь: {{ room.price_per_night }} ₽</p>
+        <p>Вместимость: {{ room.capacity }} человек</p>
+        <p>Город: {{ room.address }}</p>
+
+        {% if room.amenities_list %}
+        <p>Удобства:
+            {% for amenity in room.amenities_list %}
+                <span class="amenity-tag">{{ amenity }}</span>
+            {% endfor %}
+        </p>
+        {% endif %}
+        
+        <a href="{% url 'book_room' room.id %}" class="btn btn-success">
+            Забронировать
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="search-results">
+    <h3>Не найдено комнат</h3>
+</div>
+{% endif %}
+{% endblock %}

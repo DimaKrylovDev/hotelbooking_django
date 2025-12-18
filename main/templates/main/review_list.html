@@ -1,0 +1,246 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .reviews-wrapper {
+        padding: 1rem 0 3rem;
+    }
+
+    .reviews-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .reviews-header h1 {
+        margin: 0;
+        color: var(--primary-color);
+        font-size: 1.8rem;
+    }
+
+    .reviews-header p {
+        margin: 0;
+        color: #6b7a90;
+    }
+
+    .reviews-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .review-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .review-author {
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .review-meta {
+        color: #6b7a90;
+        font-size: 0.9rem;
+    }
+
+    .rating {
+        color: #f59e0b;
+        font-weight: 700;
+    }
+
+    .review-text {
+        color: var(--dark-color);
+        line-height: 1.5;
+    }
+
+    .empty-state {
+        padding: 3rem 2rem;
+        text-align: center;
+        background: white;
+        border-radius: var(--border-radius);
+        border: 2px dashed rgba(0, 0, 0, 0.12);
+        color: #6b7a90;
+    }
+
+    .review-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-edit {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: var(--dark-color);
+        color: white;
+    }
+
+    .btn-delete {
+        background: transparent;
+        color: var(--error-color);
+        border: 1px solid var(--error-color);
+    }
+
+    .btn-delete:hover {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .btn-reply {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-reply:hover {
+        background: #218838;
+        color: white;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 0.5rem;
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.15);
+        color: #856404;
+    }
+
+    .status-approved {
+        background: rgba(40, 167, 69, 0.15);
+        color: #155724;
+    }
+
+    .status-rejected {
+        background: rgba(220, 53, 69, 0.15);
+        color: #721c24;
+    }
+
+    .owner-reply {
+        margin-top: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: rgba(40, 167, 69, 0.08);
+        border-radius: var(--border-radius);
+        border-left: 3px solid #28a745;
+    }
+
+    .owner-reply-header {
+        font-size: 0.85rem;
+        color: #28a745;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .owner-reply-text {
+        color: var(--dark-color);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .owner-reply-date {
+        font-size: 0.8rem;
+        color: #6b7a90;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<section class="reviews-wrapper">
+    <div class="reviews-header">
+        <div>
+            <h1>Отзывы</h1>
+            <p>Отзывы гостей о ваших комнатах</p>
+        </div>
+        <div style="display:flex; gap:0.75rem; flex-wrap: wrap;">
+            {% if request.user.is_staff %}
+                <a href="{% url 'review_moderation_list' %}" class="btn" style="width:auto;">🛡️ Модерация</a>
+            {% endif %}
+            <a href="{% url 'profile' %}" class="btn btn-secondary" style="width:auto;">← Назад в профиль</a>
+        </div>
+    </div>
+
+    {% if reviews %}
+        <div class="reviews-list">
+            {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-top">
+                        <div>
+                            <div class="review-author">
+                                {{ review.guest.get_full_name|default:review.guest.email }}
+                                <span class="status-badge status-{{ review.status }}">{{ review.get_status_display }}</span>
+                            </div>
+                            <div class="review-meta">
+                                Комната: {{ review.room.get_room_type_display }} • {{ review.room.address }}<br>
+                                {{ review.created_at|date:"d.m.Y H:i" }}
+                            </div>
+                        </div>
+                        <div class="rating">⭐ {{ review.rating }}/5</div>
+                    </div>
+                    {% if review.review_text %}
+                        <div class="review-text">{{ review.review_text }}</div>
+                    {% else %}
+                        <div class="review-text" style="color:#6b7a90;">Без текста отзыва</div>
+                    {% endif %}
+                    
+                    {% if review.owner_reply %}
+                    <div class="owner-reply">
+                        <div class="owner-reply-header">💬 Ответ владельца</div>
+                        <div class="owner-reply-text">{{ review.owner_reply }}</div>
+                        <div class="owner-reply-date">{{ review.owner_reply_at|date:"d.m.Y H:i" }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="review-actions">
+                        {% if review.guest == request.user %}
+                            <a href="{% url 'review_update' review.pk %}" class="btn-sm btn-edit">✏️ Редактировать</a>
+                            <a href="{% url 'review_delete' review.pk %}" class="btn-sm btn-delete">🗑️ Удалить</a>
+                        {% endif %}
+                        {% if review.room.room_owner == request.user %}
+                            <a href="{% url 'review_reply' review.pk %}" class="btn-sm btn-reply">
+                                💬 {% if review.owner_reply %}Изменить ответ{% else %}Ответить{% endif %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            Пока нет отзывов.
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+

@@ -1,0 +1,421 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .page-wrap {
+        display: grid;
+        gap: 1.5rem;
+        margin: 2rem 0 3rem;
+    }
+
+    .results-header {
+        display: grid;
+        gap: 0.6rem;
+    }
+
+    .results-header h1 {
+        margin: 0;
+        color: var(--primary-color);
+    }
+
+    .search-summary {
+        color: #6b7a90;
+        font-size: 0.95rem;
+    }
+
+    .filters-bar {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 1rem 1.25rem;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .filters-bar form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .filters-bar label {
+        display: block;
+        color: #6b7a90;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .filters-bar input {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.95rem;
+    }
+
+    .filters-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: end;
+    }
+
+    .results-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1.25rem;
+    }
+
+    .filters-panel {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 1.25rem;
+        display: grid;
+        gap: 1rem;
+        align-self: start;
+        position: sticky;
+        top: 1rem;
+    }
+
+    .filter-block h3 {
+        margin: 0 0 0.5rem;
+        color: var(--primary-color);
+        font-size: 1rem;
+    }
+
+    .filter-list {
+        display: grid;
+        gap: 0.35rem;
+        color: #6b7a90;
+        font-size: 0.95rem;
+    }
+
+    .filters-panel form {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .filter-group {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .filter-group h3 {
+        margin: 0;
+        color: var(--primary-color);
+        font-size: 1rem;
+    }
+
+    .filters-panel input[type="number"],
+    .filters-panel select {
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        background: #fff;
+    }
+
+    .filter-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7a90;
+    }
+
+    .filter-checkbox input {
+        width: 16px;
+        height: 16px;
+    }
+
+    .results-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .result-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        align-items: stretch;
+        min-height: 240px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .result-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 32px rgba(15, 41, 77, 0.14);
+    }
+
+    .result-photo {
+        background: linear-gradient(120deg, rgba(26, 67, 153, 0.5), rgba(15, 107, 177, 0.6));
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+    }
+
+    .result-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .result-body {
+        padding: 1.5rem 1.75rem;
+        display: grid;
+        gap: 0.35rem;
+        align-content: center;
+    }
+
+    .result-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .result-title {
+        margin: 0;
+        font-size: 1.05rem;
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+
+    .result-meta {
+        color: #6b7a90;
+        display: grid;
+        gap: 0.25rem;
+        font-size: 0.95rem;
+    }
+
+    .result-price {
+        text-align: right;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .result-price small {
+        display: block;
+        color: #6b7a90;
+        font-weight: 500;
+    }
+
+    .result-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0.35rem 0 0.5rem;
+    }
+
+    .result-tags .tag {
+        background: var(--light-color);
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        color: var(--dark-color);
+    }
+
+    .result-actions {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
+    }
+
+    .empty-state {
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        background: #f8f9fb;
+        border: 1px dashed rgba(15, 41, 77, 0.2);
+        text-align: center;
+        color: #6b7a90;
+    }
+
+    @media (max-width: 1200px) {
+        .results-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .filters-panel {
+            position: relative;
+            top: 0;
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .result-card {
+            grid-template-columns: 240px 1fr;
+        }
+
+        .result-photo {
+            height: 210px;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .result-card {
+            grid-template-columns: 1fr;
+        }
+
+        .result-photo {
+            height: 200px;
+        }
+
+        .result-price {
+            text-align: left;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="page-wrap">
+        <div class="results-header">
+            <h1>{{ rooms|length }} вариантов найдено{% if destination %} в {{ destination }}{% endif %}</h1>
+            {% if check_in and check_out %}
+                <div class="search-summary">
+                    {{ check_in|date:"d M" }} — {{ check_out|date:"d M" }} · {{ nights }} ноч{% if nights|add:"0" == 1 %}ь{% elif nights|add:"0" < 5 %}и{% else %}ей{% endif %} · {{ guests }} гост(ей)
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="filters-bar">
+            <form method="get" action="{% url 'search_results' %}">
+                <div>
+                    <label for="destination">Город или отель</label>
+                    <input id="destination" name="destination" type="text" value="{{ search_form.destination.value|default_if_none:'' }}" required>
+                </div>
+                <div>
+                    <label for="check_in">Дата заезда</label>
+                    <input id="check_in" name="check_in" type="date" value="{{ search_form.check_in.value|default_if_none:'' }}" min="{{ today|date:'Y-m-d' }}" required>
+                </div>
+                <div>
+                    <label for="check_out">Дата выезда</label>
+                    <input id="check_out" name="check_out" type="date" value="{{ search_form.check_out.value|default_if_none:'' }}" min="{{ today|date:'Y-m-d' }}" required>
+                </div>
+                <div>
+                    <label for="guests">Гости</label>
+                    <input id="guests" name="guests" type="number" min="1" value="{{ search_form.guests.value|default:search_form.guests.field.initial }}">
+                </div>
+                <div class="filters-actions">
+                    <button type="submit" class="btn">Обновить поиск</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="results-layout">
+            <aside class="filters-panel">
+                <form method="get" action="{% url 'search_results' %}">
+                    <input type="hidden" name="destination" value="{{ search_form.destination.value|default_if_none:'' }}">
+                    <input type="hidden" name="check_in" value="{{ search_form.check_in.value|default_if_none:'' }}">
+                    <input type="hidden" name="check_out" value="{{ search_form.check_out.value|default_if_none:'' }}">
+                    <input type="hidden" name="guests" value="{{ search_form.guests.value|default:search_form.guests.field.initial }}">
+
+                    <div class="filter-group">
+                        <h3>Популярное</h3>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" name="amenity_wifi" value="1" {% if selected_filters.amenity_wifi %}checked{% endif %}>
+                            <span>💻 Wi‑Fi</span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" name="amenity_parking" value="1" {% if selected_filters.amenity_parking %}checked{% endif %}>
+                            <span>🚗 Парковка</span>
+                        </label>
+                    </div>
+
+                    <div class="filter-group">
+                        <h3>Тип жилья</h3>
+                        <select name="room_type">
+                            <option value="">Любой</option>
+                            {% for value, label in room_types %}
+                                <option value="{{ value }}" {% if selected_filters.room_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <h3>Цена за ночь</h3>
+                        <div class="filter-row" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                            <input type="number" name="price_min" placeholder="от" min="0" value="{{ selected_filters.price_min }}">
+                            <input type="number" name="price_max" placeholder="до" min="0" value="{{ selected_filters.price_max }}">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="width:100%;">Применить фильтры</button>
+                </form>
+            </aside>
+
+            {% if rooms %}
+            <div class="results-list">
+                {% for room in rooms %}
+                <article class="result-card">
+                    <div class="result-photo">
+                        {% with gallery=room.images.all %}
+                            {% if room.room_photo %}
+                                <img src="{{ room.room_photo.url }}" alt="Фото номера">
+                            {% elif gallery|length %}
+                                <img src="{{ gallery.0.image.url }}" alt="Фото номера">
+                            {% else %}
+                                <div style="width:100%; height:100%; display:grid; place-items:center; color:white; font-size:2.4rem;">🏨</div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <div class="result-body">
+                        <div class="result-top">
+                            <div>
+                                <h2 class="result-title">{{ room.get_room_type_display }}</h2>
+                                <div class="result-meta">
+                                    <span>{{ room.address }}</span>
+                                    <span>Вместимость: до {{ room.capacity }} гост(ей)</span>
+                                    {% if room.size %}<span>Размер: {{ room.size }}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="result-price">
+                                {{ room.price_per_night|floatformat:0 }} ₽/ночь
+                                {% if nights %}
+                                    <small>≈ {{ room.total_price_for_dates|default:room.price_per_night|floatformat:0 }} ₽ за {{ nights }} ноч{% if nights|add:"0" == 1 %}ь{% elif nights|add:"0" < 5 %}и{% else %}ей{% endif %}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if room.amenities_list %}
+                        <div class="result-tags">
+                            {% for amenity in room.amenities_list|slice:":4" %}
+                                <span class="tag">{{ amenity }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="result-actions">
+                            <a href="{% url 'room_detail' room.id %}" class="btn btn-secondary" style="width:auto;">Подробнее</a>
+                            {% if request.user.is_authenticated %}
+                                {% if room.room_owner != request.user %}
+                                    <a href="{% url 'booking_create' room_id=room.id %}" class="btn" style="width:auto;">Забронировать</a>
+                                {% else %}
+                                    <span class="btn" style="width:auto; background:#6c757d; cursor:not-allowed; opacity:0.6;">Это ваша комната</span>
+                                {% endif %}
+                            {% else %}
+                                <a href="{% url 'login' %}?next={% url 'booking_create' room_id=room.id %}" class="btn" style="width:auto;">Забронировать</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+                <div class="empty-state">
+                    {{ no_results_message|default:"Нет доступных номеров по вашему запросу." }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

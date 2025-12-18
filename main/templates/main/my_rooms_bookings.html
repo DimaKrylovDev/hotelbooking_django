@@ -1,0 +1,372 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .bookings-wrapper {
+        padding: 1rem 0 3rem;
+    }
+
+    .bookings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .bookings-header h1 {
+        margin: 0;
+        color: var(--primary-color);
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+    }
+
+    .bookings-header p {
+        margin: 0.5rem 0 0;
+        color: #6b7a90;
+    }
+
+    .stats-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-width: 180px;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+    }
+
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7a90;
+    }
+
+    .room-section {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .room-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1a4a8a 100%);
+        color: white;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .room-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .room-meta {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .bookings-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .bookings-table th,
+    .bookings-table td {
+        padding: 1rem 1.25rem;
+        text-align: left;
+        border-bottom: 1px solid var(--light-color);
+    }
+
+    .bookings-table th {
+        background: #f8f9fb;
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .bookings-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .bookings-table tr:hover td {
+        background: #f8f9fb;
+    }
+
+    .guest-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .guest-name {
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .guest-contact {
+        font-size: 0.85rem;
+        color: #6b7a90;
+    }
+
+    .guest-contact a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    .guest-contact a:hover {
+        text-decoration: underline;
+    }
+
+    .dates-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .date-range {
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .nights-count {
+        font-size: 0.85rem;
+        color: #6b7a90;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.15);
+        color: #856404;
+    }
+
+    .status-confirmed {
+        background: rgba(40, 167, 69, 0.15);
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background: rgba(220, 53, 69, 0.15);
+        color: #721c24;
+    }
+
+    .price-info {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .empty-bookings {
+        padding: 2rem;
+        text-align: center;
+        color: #6b7a90;
+    }
+
+    .empty-state {
+        padding: 3rem 2rem;
+        text-align: center;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        border: 2px dashed rgba(15, 41, 77, 0.15);
+    }
+
+    .empty-state h3 {
+        color: var(--primary-color);
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-state p {
+        color: #6b7a90;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+        .bookings-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .bookings-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .stats-row {
+            flex-direction: column;
+        }
+
+        .stat-card {
+            width: 100%;
+        }
+
+        .room-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .bookings-table th,
+        .bookings-table td {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<section class="bookings-wrapper">
+    <div class="bookings-header">
+        <div>
+            <h1>📋 Бронирования моих комнат</h1>
+            <p>Управляйте бронированиями и связывайтесь с гостями</p>
+        </div>
+        <a href="{% url 'profile' %}" class="btn btn-secondary" style="width: auto;">
+            ← Назад к профилю
+        </a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <span class="stat-icon">📊</span>
+            <div class="stat-info">
+                <span class="stat-value">{{ total_bookings }}</span>
+                <span class="stat-label">Всего бронирований</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">✅</span>
+            <div class="stat-info">
+                <span class="stat-value">{{ active_bookings }}</span>
+                <span class="stat-label">Активных</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">🏠</span>
+            <div class="stat-info">
+                <span class="stat-value">{{ rooms|length }}</span>
+                <span class="stat-label">Комнат</span>
+            </div>
+        </div>
+    </div>
+
+    {% if rooms %}
+        {% for room in rooms %}
+            <div class="room-section">
+                <div class="room-header">
+                    <h3 class="room-title">
+                        {{ room.get_room_type_display }} — {{ room.address }}
+                    </h3>
+                    <div class="room-meta">
+                        <span>💰 {{ room.price_per_night }} ₽/ночь</span>
+                        <span>👥 до {{ room.capacity }} чел.</span>
+                        <span>📐 {{ room.size }} м²</span>
+                    </div>
+                </div>
+
+                {% if room.bookings.all %}
+                    <table class="bookings-table">
+                        <thead>
+                            <tr>
+                                <th>Гость</th>
+                                <th>Контакты</th>
+                                <th>Даты проживания</th>
+                                <th>Статус</th>
+                                <th>Стоимость</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in room.bookings.all %}
+                                <tr>
+                                    <td>
+                                        <span class="guest-name">{{ booking.guest.get_full_name }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="guest-info">
+                                            <span class="guest-contact">📧 {{ booking.guest.email }}</span>
+                                            <span class="guest-contact">📞 {{ booking.guest.phone }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dates-info">
+                                            <span class="date-range">
+                                                {{ booking.check_in_date|date:"d.m.Y" }} — {{ booking.check_out_date|date:"d.m.Y" }}
+                                            </span>
+                                            {% with days=booking.check_out_date|timeuntil:booking.check_in_date %}
+                                                <span class="nights-count">
+                                                    {% widthratio booking.total_cost room.price_per_night 1 as nights %}
+                                                    {{ nights }} ночей
+                                                </span>
+                                            {% endwith %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-{{ booking.status|lower }}">
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="price-info">{{ booking.total_cost|floatformat:0 }} ₽</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-bookings">
+                        <p>🔍 Пока нет бронирований для этой комнаты</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <h3>У вас пока нет комнат</h3>
+            <p>Создайте комнату, чтобы начать принимать бронирования от гостей.</p>
+            <a href="{% url 'room_create' %}" class="btn">➕ Создать комнату</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+

@@ -1,0 +1,480 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .booking-form-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .form-header-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-header h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+    }
+    
+    .form-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .form-body {
+        padding: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+    
+    .form-group label.required::after {
+        content: " *";
+        color: var(--error-color);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        font-family: inherit;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+    }
+    
+    .form-control.is-invalid {
+        border-color: var(--error-color);
+    }
+    
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+    }
+    
+    .form-help {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .error-list {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        padding-left: 1rem;
+        list-style: none;
+    }
+    
+    .error-list li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .error-list li::before {
+        content: "⚠ ";
+        margin-right: 0.25rem;
+    }
+    
+    .room-info-card {
+        background: var(--light-color);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .room-info-card h3 {
+        margin: 0 0 1rem;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+    
+    .room-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .room-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .room-info-item.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .room-info-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .room-info-value {
+        font-size: 1rem;
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+    
+    .price-preview {
+        background: linear-gradient(135deg, rgba(74, 111, 165, 0.1), rgba(107, 140, 188, 0.1));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+    
+    .price-preview-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .price-preview-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .price-preview-nights {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .btn-cancel {
+        background: transparent;
+        color: var(--dark-color);
+        border: 2px solid var(--border-color);
+    }
+    
+    .btn-cancel:hover {
+        background: var(--light-color);
+        border-color: var(--dark-color);
+    }
+    
+    .btn-submit {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .btn-submit:hover {
+        background: #218838;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .booking-info {
+        background: rgba(74, 111, 165, 0.05);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-left: 3px solid var(--primary-color);
+    }
+    
+    .booking-info h4 {
+        margin: 0 0 0.5rem;
+        color: var(--primary-color);
+        font-size: 1rem;
+    }
+    
+    .booking-info p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+        color: #6b7a90;
+    }
+    
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+        
+        .room-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="booking-form-container">
+    <div class="form-header">
+        <div class="form-header-icon">✏️</div>
+        <h1>Обновление бронирования</h1>
+        <p>Измените даты бронирования</p>
+    </div>
+    
+    <div class="form-body">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <form method="post" id="booking-form" {% if room %}data-price-per-night="{{ room.price_per_night }}"{% endif %}>
+            {% csrf_token %}
+            
+            <!-- Информация о текущем бронировании -->
+            {% if booking %}
+            <div class="booking-info">
+                <h4>Текущее бронирование #{{ booking.id }}</h4>
+                <p><strong>Статус:</strong> {{ booking.get_status_display }}</p>
+                <p><strong>Текущие даты:</strong> {{ booking.check_in_date|date:"d.m.Y" }} — {{ booking.check_out_date|date:"d.m.Y" }}</p>
+                <p><strong>Текущая стоимость:</strong> {{ booking.total_cost|floatformat:2 }} ₽</p>
+            </div>
+            {% endif %}
+            
+            <!-- Информация о комнате -->
+            {% if room %}
+            <div class="form-section">
+                <h2 class="section-title">🏠 Информация о комнате</h2>
+                <div class="room-info-card">
+                    <h3>Комната #{{ room.id }}</h3>
+                    <div class="room-info-grid">
+                        <div class="room-info-item">
+                            <span class="room-info-label">Тип комнаты</span>
+                            <span class="room-info-value">{{ room.get_room_type_display }}</span>
+                        </div>
+                        <div class="room-info-item">
+                            <span class="room-info-label">Адрес</span>
+                            <span class="room-info-value">{{ room.address }}</span>
+                        </div>
+                        <div class="room-info-item">
+                            <span class="room-info-label">Вместимость</span>
+                            <span class="room-info-value">{{ room.capacity }} чел.</span>
+                        </div>
+                        <div class="room-info-item">
+                            <span class="room-info-label">Размер</span>
+                            <span class="room-info-value">{{ room.size|default:"Не указан" }}</span>
+                        </div>
+                        <div class="room-info-item">
+                            <span class="room-info-label">Цена за ночь</span>
+                            <span class="room-info-value">{{ room.price_per_night }} ₽</span>
+                        </div>
+                        {% if room.amenities_list %}
+                        <div class="room-info-item full-width">
+                            <span class="room-info-label">Удобства</span>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                                {% for amenity in room.amenities_list %}
+                                    <span style="background: var(--light-color); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.875rem;">{{ amenity }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Даты бронирования -->
+            <div class="form-section">
+                <h2 class="section-title">📆 Новые даты бронирования</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.check_in_date.id_for_label }}" class="required">Дата заезда</label>
+                        <input type="date" 
+                               name="{{ form.check_in_date.name }}" 
+                               id="{{ form.check_in_date.id_for_label }}"
+                               value="{{ form.check_in_date.value|date:'Y-m-d'|default:'' }}"
+                               class="form-control {% if form.check_in_date.errors %}is-invalid{% endif %}"
+                               min="{{ today|date:'Y-m-d' }}"
+                               required>
+                        {% if form.check_in_date.errors %}
+                            <ul class="error-list">
+                                {% for error in form.check_in_date.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.check_out_date.id_for_label }}" class="required">Дата выезда</label>
+                        <input type="date" 
+                               name="{{ form.check_out_date.name }}" 
+                               id="{{ form.check_out_date.id_for_label }}"
+                               value="{{ form.check_out_date.value|date:'Y-m-d'|default:'' }}"
+                               class="form-control {% if form.check_out_date.errors %}is-invalid{% endif %}"
+                               min="{{ today|date:'Y-m-d' }}"
+                               required>
+                        {% if form.check_out_date.errors %}
+                            <ul class="error-list">
+                                {% for error in form.check_out_date.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Предварительный расчет стоимости -->
+            <div class="price-preview" id="price-preview" style="display: none;">
+                <div class="price-preview-label">Новая стоимость</div>
+                <div class="price-preview-value" id="total-cost">0 ₽</div>
+                <div class="price-preview-nights" id="nights-count">0 ночей</div>
+            </div>
+            
+            <!-- Действия -->
+            <div class="form-actions">
+                <a href="{% url 'profile' %}" class="btn btn-cancel">
+                    Отмена
+                </a>
+                <button type="submit" class="btn btn-submit">
+                    ✅ Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookingForm = document.getElementById('booking-form');
+        const checkInInput = document.getElementById('{{ form.check_in_date.id_for_label }}');
+        const checkOutInput = document.getElementById('{{ form.check_out_date.id_for_label }}');
+        const pricePreview = document.getElementById('price-preview');
+        const totalCost = document.getElementById('total-cost');
+        const nightsCount = document.getElementById('nights-count');
+        
+        const pricePerNight = bookingForm.dataset.pricePerNight ? parseFloat(bookingForm.dataset.pricePerNight) : 0;
+        
+        function calculatePrice() {
+            const checkIn = checkInInput.value;
+            const checkOut = checkOutInput.value;
+            
+            if (checkIn && checkOut && pricePerNight > 0) {
+                const checkInDate = new Date(checkIn);
+                const checkOutDate = new Date(checkOut);
+                const diffTime = Math.abs(checkOutDate - checkInDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays > 0) {
+                    const total = pricePerNight * diffDays;
+                    totalCost.textContent = total.toFixed(2) + ' ₽';
+                    nightsCount.textContent = diffDays + ' ' + (diffDays === 1 ? 'ночь' : diffDays < 5 ? 'ночи' : 'ночей');
+                    pricePreview.style.display = 'block';
+                } else {
+                    pricePreview.style.display = 'none';
+                }
+            } else {
+                pricePreview.style.display = 'none';
+            }
+        }
+        
+        checkInInput.addEventListener('change', function() {
+            calculatePrice();
+            if (checkInInput.value) {
+                const nextDay = new Date(checkInInput.value);
+                nextDay.setDate(nextDay.getDate() + 1);
+                checkOutInput.min = nextDay.toISOString().split('T')[0];
+            }
+        });
+        
+        checkOutInput.addEventListener('change', calculatePrice);
+        
+        // Инициализация при загрузке
+        calculatePrice();
+    });
+</script>
+{% endblock %}
+

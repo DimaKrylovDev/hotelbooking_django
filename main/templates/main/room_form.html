@@ -1,0 +1,723 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .room-form-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .form-header-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-header h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+    }
+    
+    .form-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .form-body {
+        padding: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+    
+    .form-group label.required::after {
+        content: " *";
+        color: var(--error-color);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        font-family: inherit;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+    }
+    
+    .form-control.is-invalid {
+        border-color: var(--error-color);
+    }
+    
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+    }
+    
+    .form-help {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .error-list {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        padding-left: 1rem;
+        list-style: none;
+    }
+    
+    .error-list li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .error-list li::before {
+        content: "⚠ ";
+        margin-right: 0.25rem;
+    }
+    
+    .amenities-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 0.75rem;
+        padding: 1rem;
+        background: var(--light-color);
+        border-radius: var(--border-radius);
+    }
+    
+    .amenity-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .amenity-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: var(--primary-color);
+    }
+    
+    .amenity-checkbox label {
+        margin: 0;
+        font-weight: 500;
+        cursor: pointer;
+        flex: 1;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .btn-cancel {
+        background: transparent;
+        color: var(--dark-color);
+        border: 2px solid var(--border-color);
+    }
+    
+    .btn-cancel:hover {
+        background: var(--light-color);
+        border-color: var(--dark-color);
+    }
+    
+    .btn-submit {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .btn-submit:hover {
+        background: #218838;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 2rem 1.5rem;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        margin-bottom: 1rem;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+        border-color: var(--primary-color);
+        background: rgba(26, 101, 255, 0.04);
+    }
+
+    .upload-zone-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-zone-text {
+        color: #6b7a90;
+        font-size: 0.95rem;
+    }
+
+    .upload-zone-text strong {
+        color: var(--primary-color);
+    }
+
+    .upload-zone input[type="file"] {
+        display: none;
+    }
+
+    .gallery-previews {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .gallery-preview-card {
+        position: relative;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .gallery-preview-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
+    .gallery-preview-card img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .gallery-preview-info {
+        padding: 0.5rem 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .gallery-preview-name {
+        font-size: 0.75rem;
+        color: #6b7a90;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+    }
+
+    .gallery-preview-badge {
+        background: var(--primary-color);
+        color: white;
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .gallery-preview-remove {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(220, 53, 69, 0.9);
+        border: none;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .gallery-preview-card:hover .gallery-preview-remove {
+        opacity: 1;
+    }
+
+    .gallery-counter {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: #e8f4fd;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: var(--primary-color);
+        margin-bottom: 0.75rem;
+    }
+
+    .gallery-counter-bar {
+        flex: 1;
+        height: 6px;
+        background: #d1e3f6;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .gallery-counter-fill {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+    
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+        
+        .amenities-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="room-form-container">
+    <div class="form-header">
+        <div class="form-header-icon">🏠</div>
+        <h1>Создание объявления о комнате</h1>
+        <p>Заполните информацию о вашей комнате для сдачи в аренду</p>
+    </div>
+    
+    <div class="form-body">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h2 class="section-title">📋 Основная информация</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.room_type.id_for_label }}" class="required">Тип комнаты</label>
+                        <select name="{{ form.room_type.name }}" 
+                                id="{{ form.room_type.id_for_label }}"
+                                class="form-control {% if form.room_type.errors %}is-invalid{% endif %}"
+                                required>
+                            <option value="">Выберите тип комнаты</option>
+                            {% for value, label in form.room_type.field.choices %}
+                                <option value="{{ value }}" {% if form.room_type.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.room_type.errors %}
+                            <ul class="error-list">
+                                {% for error in form.room_type.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.address.id_for_label }}" class="required">Город</label>
+                        <input type="text" 
+                               name="{{ form.address.name }}" 
+                               id="{{ form.address.id_for_label }}"
+                               value="{{ form.address.value|default:'' }}"
+                               class="form-control {% if form.address.errors %}is-invalid{% endif %}"
+                               placeholder="Например: Москва"
+                               required>
+                        {% if form.address.errors %}
+                            <ul class="error-list">
+                                {% for error in form.address.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Фото номера -->
+            <div class="form-section">
+                <h2 class="section-title">📷 Фото номера</h2>
+                <div class="form-group full-width">
+                    <label for="{{ form.room_photo.id_for_label }}">Загрузите фото (необязательно)</label>
+                    <input type="file"
+                           name="{{ form.room_photo.name }}"
+                           id="{{ form.room_photo.id_for_label }}"
+                           class="form-control {% if form.room_photo.errors %}is-invalid{% endif %}">
+                    {% if form.room_photo.errors %}
+                        <ul class="error-list">
+                            {% for error in form.room_photo.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div class="form-group full-width">
+                    <label>Дополнительные фото</label>
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-zone-icon">📸</div>
+                        <div class="upload-zone-text">
+                            <strong>Нажмите или перетащите</strong> фотографии сюда<br>
+                            <small>Макс. 5 фото всего (включая основное). JPG, PNG до 10MB</small>
+                        </div>
+                        <input type="file"
+                               name="gallery_images"
+                               id="gallery_images"
+                               multiple
+                               accept="image/*">
+                    </div>
+                    <div class="gallery-counter" id="gallery-counter" style="display:none;">
+                        <span id="counter-text">0 / 5 фото</span>
+                        <div class="gallery-counter-bar">
+                            <div class="gallery-counter-fill" id="counter-fill" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div class="gallery-previews" id="gallery-previews"></div>
+                </div>
+            </div>
+            
+            <!-- Цена и параметры -->
+            <div class="form-section">
+                <h2 class="section-title">💰 Цена и параметры</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.price_per_night.id_for_label }}" class="required">Цена за ночь (₽)</label>
+                        <input type="number" 
+                               name="{{ form.price_per_night.name }}" 
+                               id="{{ form.price_per_night.id_for_label }}"
+                               value="{{ form.price_per_night.value|default:'' }}"
+                               class="form-control {% if form.price_per_night.errors %}is-invalid{% endif %}"
+                               min="100"
+                               step="0.01"
+                               placeholder="1000"
+                               required>
+                        <div class="form-help">Минимальная цена: 100 ₽</div>
+                        {% if form.price_per_night.errors %}
+                            <ul class="error-list">
+                                {% for error in form.price_per_night.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.capacity.id_for_label }}" class="required">Вместимость (человек)</label>
+                        <input type="number" 
+                               name="{{ form.capacity.name }}" 
+                               id="{{ form.capacity.id_for_label }}"
+                               value="{{ form.capacity.value|default:'2' }}"
+                               class="form-control {% if form.capacity.errors %}is-invalid{% endif %}"
+                               min="1"
+                               placeholder="2"
+                               required>
+                        {% if form.capacity.errors %}
+                            <ul class="error-list">
+                                {% for error in form.capacity.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.size.id_for_label }}">Размер (м²)</label>
+                        <input type="text" 
+                               name="{{ form.size.name }}" 
+                               id="{{ form.size.id_for_label }}"
+                               value="{{ form.size.value|default:'' }}"
+                               class="form-control {% if form.size.errors %}is-invalid{% endif %}"
+                               placeholder="например, 25 м²">
+                        {% if form.size.errors %}
+                            <ul class="error-list">
+                                {% for error in form.size.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Удобства -->
+            <div class="form-section">
+                <h2 class="section-title">✨ Удобства в номере</h2>
+                <div class="form-group">
+                    <label for="{{ form.amenities.id_for_label }}">Опишите удобства (необязательно)</label>
+                    {{ form.amenities }}
+                    {% if form.amenities.help_text %}
+                        <div class="form-help">{{ form.amenities.help_text }}</div>
+                    {% endif %}
+                    {% if form.amenities.errors %}
+                        <ul class="error-list">
+                            {% for error in form.amenities.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Действия -->
+            <div class="form-actions">
+                <a href="{% url 'profile' %}" class="btn btn-cancel">
+                    Отмена
+                </a>
+                <button type="submit" class="btn btn-submit">
+                    ✅ Создать объявление
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+(function() {
+    var MAX_PHOTOS = 5;
+    var uploadZone = document.getElementById('upload-zone');
+    var input = document.getElementById('gallery_images');
+    var mainInput = document.getElementById('{{ form.room_photo.id_for_label }}');
+    var preview = document.getElementById('gallery-previews');
+    var counter = document.getElementById('gallery-counter');
+    var counterText = document.getElementById('counter-text');
+    var counterFill = document.getElementById('counter-fill');
+    
+    var selectedFiles = [];
+    
+    if (!uploadZone || !input || !preview) return;
+    
+    // Click to upload
+    uploadZone.addEventListener('click', function() {
+        input.click();
+    });
+    
+    // Drag and drop
+    uploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+    
+    uploadZone.addEventListener('dragleave', function() {
+        uploadZone.classList.remove('dragover');
+    });
+    
+    uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        var files = Array.from(e.dataTransfer.files).filter(function(f) {
+            return f.type.startsWith('image/');
+        });
+        addFiles(files);
+    });
+    
+    input.addEventListener('change', function() {
+        var files = Array.from(input.files || []);
+        addFiles(files);
+    });
+    
+    function addFiles(newFiles) {
+        var hasMain = mainInput && mainInput.files && mainInput.files.length > 0;
+        var maxAllowed = MAX_PHOTOS - (hasMain ? 1 : 0);
+        
+        newFiles.forEach(function(file) {
+            if (selectedFiles.length < maxAllowed && file.type.startsWith('image/')) {
+                selectedFiles.push(file);
+            }
+        });
+        
+        updateDataTransfer();
+        renderPreviews();
+    }
+    
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        updateDataTransfer();
+        renderPreviews();
+    }
+    
+    function updateDataTransfer() {
+        var dt = new DataTransfer();
+        selectedFiles.forEach(function(file) {
+            dt.items.add(file);
+        });
+        input.files = dt.files;
+    }
+    
+    function renderPreviews() {
+        preview.innerHTML = '';
+        
+        var hasMain = mainInput && mainInput.files && mainInput.files.length > 0;
+        var totalCount = selectedFiles.length + (hasMain ? 1 : 0);
+        
+        if (selectedFiles.length > 0) {
+            counter.style.display = 'flex';
+            counterText.textContent = totalCount + ' / ' + MAX_PHOTOS + ' фото';
+            counterFill.style.width = (totalCount / MAX_PHOTOS * 100) + '%';
+        } else {
+            counter.style.display = 'none';
+        }
+        
+        selectedFiles.forEach(function(file, index) {
+            var card = document.createElement('div');
+            card.className = 'gallery-preview-card';
+            
+            var img = document.createElement('img');
+            img.alt = file.name;
+            
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'gallery-preview-remove';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = function(e) {
+                e.stopPropagation();
+                removeFile(index);
+            };
+            
+            var info = document.createElement('div');
+            info.className = 'gallery-preview-info';
+            
+            var name = document.createElement('span');
+            name.className = 'gallery-preview-name';
+            name.textContent = file.name;
+            
+            var badge = document.createElement('span');
+            badge.className = 'gallery-preview-badge';
+            badge.textContent = (index + 1);
+            
+            info.appendChild(name);
+            info.appendChild(badge);
+            
+            card.appendChild(img);
+            card.appendChild(removeBtn);
+            card.appendChild(info);
+            preview.appendChild(card);
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // Update counter when main photo changes
+    if (mainInput) {
+        mainInput.addEventListener('change', function() {
+            var hasMain = mainInput.files && mainInput.files.length > 0;
+            var maxAllowed = MAX_PHOTOS - (hasMain ? 1 : 0);
+            
+            // Trim if exceeded
+            if (selectedFiles.length > maxAllowed) {
+                selectedFiles = selectedFiles.slice(0, maxAllowed);
+                updateDataTransfer();
+            }
+            renderPreviews();
+        });
+    }
+})();
+</script>
+{% endblock %}
+

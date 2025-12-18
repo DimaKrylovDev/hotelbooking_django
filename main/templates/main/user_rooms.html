@@ -1,0 +1,259 @@
+<style>
+    .rooms-section {
+        margin-top: 2rem;
+    }
+
+    .rooms-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .rooms-header h2 {
+        margin: 0;
+        color: var(--primary-color);
+        font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+    }
+
+    .rooms-header p {
+        margin: 0;
+        color: #6b7a90;
+    }
+
+    .rooms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .room-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .room-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .room-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .room-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    .room-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .room-status.active {
+        background: rgba(40, 167, 69, 0.12);
+        color: var(--success-color);
+    }
+
+    .room-status.inactive {
+        background: rgba(220, 53, 69, 0.12);
+        color: var(--error-color);
+    }
+
+    .room-info {
+        display: grid;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        flex-grow: 1;
+    }
+
+    .room-info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--light-color);
+    }
+
+    .room-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .room-info-label {
+        color: #6b7a90;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .room-info-value {
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+
+    .room-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0.5rem 0;
+    }
+
+    .amenities-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .amenity-tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: var(--light-color);
+        border-radius: 999px;
+        font-size: 0.85rem;
+        color: var(--dark-color);
+    }
+
+    .room-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--light-color);
+    }
+
+    .btn-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        width: auto;
+        flex: 1;
+    }
+
+    .empty-rooms {
+        padding: 3rem 2rem;
+        text-align: center;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        border: 2px dashed rgba(15, 41, 77, 0.15);
+    }
+
+    .empty-rooms h3 {
+        color: var(--primary-color);
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-rooms p {
+        color: #6b7a90;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .rooms-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .rooms-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .room-actions {
+            flex-direction: column;
+        }
+
+        .btn-small {
+            width: 100%;
+        }
+    }
+</style>
+
+
+
+<section class="rooms-section">
+    <article class="summary-card">
+        <div class="rooms-header">
+            <div>
+                <h2>Мои комнаты</h2>
+                <p>Управляйте своими объявлениями о сдаче в аренду</p>
+            </div>
+        </div>
+
+        {% if user_rooms %}
+            <div class="rooms-grid">
+                {% for room in user_rooms %}
+                    <div class="room-card">
+                        <div class="room-header">
+                            <h3 class="room-title">{{ room.get_room_type_display }}</h3>
+                            <span class="room-status {% if room.is_active %}active{% else %}inactive{% endif %}">
+                                {% if room.is_active %}Активна{% else %}Неактивна{% endif %}
+                            </span>
+                        </div>
+
+                        <div class="room-info">
+                            <div class="room-info-item">
+                                <span class="room-info-label">Адрес</span>
+                                <span class="room-info-value">{{ room.address|default:"Не указан" }}</span>
+                            </div>
+                            <div class="room-info-item">
+                                <span class="room-info-label">Вместимость</span>
+                                <span class="room-info-value">{{ room.capacity }} чел.</span>
+                            </div>
+                            {% if room.size %}
+                            <div class="room-info-item">
+                                <span class="room-info-label">Размер</span>
+                                <span class="room-info-value">{{ room.size }} м²</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="room-price">
+                            {{ room.price_per_night }} ₽ / ночь
+                        </div>
+
+                        {% if room.amenities_list %}
+                            <div class="amenities-list">
+                                {% for amenity in room.amenities_list %}
+                                    <span class="amenity-tag">{{ amenity }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="room-actions">
+                            <a href="{% url 'room_detail' pk=room.pk %}" class="btn btn-small">👁 Посмотреть</a>
+                            <a href="{% url 'update_room' room.pk %}" class="btn btn-small btn-secondary">✏️ Редактировать</a>
+                            <a href="{% url 'room_delete' room.pk %}" class="btn btn-small btn-logout">🗑 Удалить</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-actions" style="margin-top:1.5rem; justify-content:flex-start;">
+                <a href="{% url 'room_create' %}" class="btn">Добавить ещё комнату</a>
+            </div>
+        {% else %}
+            <div class="empty-rooms">
+                <h3>У вас пока нет комнат</h3>
+                <p>Начните сдавать жильё в аренду, создав первое объявление о комнате.</p>
+                <a href="{% url 'room_create' %}" class="btn">Добавить комнату</a>
+            </div>
+        {% endif %}
+    </article>
+</section>
+

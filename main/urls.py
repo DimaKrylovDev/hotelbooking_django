@@ -1,0 +1,30 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.HomeView.as_view(), name='home'),
+    path('search/', views.SearchResultsView.as_view(), name='search_results'),
+    path('signup/', views.signup_view, name='signup'),
+    path('login/', views.login_view, name='login'),
+    path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('logout/', views.logout_view, name='logout'),
+    path('edit_profile/', views.edit_profile_view, name='edit_profile'),
+    path('room/create/', views.RoomCreateView.as_view(), name='room_create'),
+    path('room/<int:pk>/update/', views.update_room_view, name='update_room'),
+    path('room/<int:pk>/', views.RoomDetailView.as_view(), name='room_detail'),
+    path('room/<int:pk>/delete/', views.RoomDeleteView.as_view(), name='room_delete'),
+    path('booking/room/<int:room_id>/create/', views.BookingCreateView.as_view(), name='booking_create'),
+    path('booking/<int:pk>/update/', views.update_booking_view, name='booking_update'),
+    path('booking/<int:pk>/confirm/', views.confirm_booking_view, name='booking_confirm'),
+    path('booking/<int:pk>/delete/', views.BookingDeleteView.as_view(), name='booking_delete'),
+    path('booking/history/', views.booking_history_view, name='booking_history'),
+    path('booking/<int:booking_id>/review/create/', views.ReviewCreateView.as_view(), name='review_create'),
+    path('reviews/', views.ReviewListView.as_view(), name='reviews'),
+    path('review/<int:pk>/update/', views.ReviewUpdateView.as_view(), name='review_update'),
+    path('review/<int:pk>/delete/', views.ReviewDeleteView.as_view(), name='review_delete'),
+    path('review/<int:pk>/reply/', views.ReviewReplyView.as_view(), name='review_reply'),
+    path('moderation/reviews/', views.ReviewModerationListView.as_view(), name='review_moderation_list'),
+    path('moderation/review/<int:pk>/', views.ReviewModerateView.as_view(), name='review_moderate'),
+    path('moderation/review/<int:pk>/<str:action>/', views.ReviewQuickModerateView.as_view(), name='review_quick_moderate'),
+    path('my-rooms/bookings/', views.MyRoomsBookingsView.as_view(), name='my_rooms_bookings'),
+]

@@ -1,0 +1,254 @@
+{% extends "main/layout.html" %}
+
+{% block content %}
+<style>
+    .moderate-wrapper {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+    }
+
+    .moderate-wrapper h1 {
+        margin: 0 0 1.5rem;
+        color: var(--primary-color);
+        font-size: 1.6rem;
+    }
+
+    .review-preview {
+        padding: 1.25rem;
+        background: var(--light-color);
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .review-preview .author {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .review-preview .rating {
+        color: #f59e0b;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .review-preview .text {
+        color: var(--dark-color);
+        line-height: 1.6;
+        font-style: italic;
+    }
+
+    .review-preview .meta {
+        color: #6b7a90;
+        font-size: 0.85rem;
+        margin-top: 0.75rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 0.5rem;
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.15);
+        color: #856404;
+    }
+
+    .status-approved {
+        background: rgba(40, 167, 69, 0.15);
+        color: #155724;
+    }
+
+    .status-rejected {
+        background: rgba(220, 53, 69, 0.15);
+        color: #721c24;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--primary-color);
+        color: #fff;
+    }
+
+    .quick-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: var(--border-radius);
+    }
+
+    .quick-actions span {
+        color: #6b7a90;
+        font-size: 0.9rem;
+        align-self: center;
+    }
+
+    .btn-approve {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-approve:hover {
+        background: #218838;
+        color: white;
+    }
+
+    .btn-reject {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .btn-reject:hover {
+        background: #c82333;
+        color: white;
+    }
+
+    .owner-reply-box {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(40, 167, 69, 0.08);
+        border-radius: var(--border-radius);
+        border-left: 4px solid #28a745;
+    }
+
+    .owner-reply-box h4 {
+        margin: 0 0 0.5rem;
+        color: #28a745;
+        font-size: 0.9rem;
+    }
+
+    .owner-reply-box p {
+        margin: 0;
+        color: var(--dark-color);
+    }
+
+    .moderation-history {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: var(--border-radius);
+        font-size: 0.9rem;
+        color: #6b7a90;
+    }
+</style>
+
+<div class="moderate-wrapper">
+    <h1>🛡️ Модерация отзыва #{{ review.id }}</h1>
+
+    <div class="review-preview">
+        <div class="author">
+            {{ review.guest.get_full_name|default:review.guest.email }}
+            <span class="status-badge status-{{ review.status }}">{{ review.get_status_display }}</span>
+        </div>
+        <div class="rating">⭐ {{ review.rating }}/5</div>
+        {% if review.review_text %}
+            <div class="text">"{{ review.review_text }}"</div>
+        {% else %}
+            <div class="text" style="color:#6b7a90;">Без текста отзыва</div>
+        {% endif %}
+        <div class="meta">
+            Комната: {{ review.room.get_room_type_display }} • {{ review.room.address }}<br>
+            Владелец: {{ review.room.room_owner.get_full_name|default:review.room.room_owner.email }}<br>
+            Дата создания: {{ review.created_at|date:"d.m.Y H:i" }}
+        </div>
+
+        {% if review.owner_reply %}
+        <div class="owner-reply-box">
+            <h4>💬 Ответ владельца ({{ review.owner_reply_at|date:"d.m.Y H:i" }})</h4>
+            <p>{{ review.owner_reply }}</p>
+        </div>
+        {% endif %}
+
+        {% if review.moderated_by %}
+        <div class="moderation-history">
+            <strong>История модерации:</strong><br>
+            Модератор: {{ review.moderated_by.get_full_name|default:review.moderated_by.email }}<br>
+            Дата: {{ review.moderated_at|date:"d.m.Y H:i" }}
+            {% if review.moderation_comment %}
+                <br>Комментарий: {{ review.moderation_comment }}
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if review.status == 'pending' %}
+    <div class="quick-actions">
+        <span>Быстрые действия:</span>
+        <a href="{% url 'review_quick_moderate' review.pk 'approve' %}" class="btn btn-approve" style="padding: 0.5rem 1rem;">✓ Одобрить</a>
+        <a href="{% url 'review_quick_moderate' review.pk 'reject' %}" class="btn btn-reject" style="padding: 0.5rem 1rem;">✕ Отклонить</a>
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_status">{{ form.status.label }}</label>
+            {{ form.status }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_moderation_comment">{{ form.moderation_comment.label }}</label>
+            {{ form.moderation_comment }}
+            <small style="color: #6b7a90; display: block; margin-top: 0.25rem;">
+                Укажите причину, если отклоняете отзыв
+            </small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn">Сохранить</button>
+            <a href="{% url 'review_moderation_list' %}" class="btn btn-secondary">Назад к списку</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
