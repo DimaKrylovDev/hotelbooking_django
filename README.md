@@ -1,1 +1,0 @@
-# hotelbooking_django
